@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: mailflow
+      POSTGRES_USER: mailflow
+      POSTGRES_PASSWORD: mailflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mailflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ..
+      dockerfile: infrastructure/docker/Dockerfile.api
+    ports:
+      - "8000:8000"
+    env_file:
+      - ../.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ../apps/api/app:/app/apps/api/app
+      - ../packages/core/mailflow_core:/app/packages/core/mailflow_core
+    command: uv run uvicorn apps.api.app.main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  postgres_data:

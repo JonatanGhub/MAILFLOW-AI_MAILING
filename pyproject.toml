@@ -1,0 +1,18 @@
+[tool.uv.workspace]
+members = [
+    "apps/api",
+    "apps/worker",
+    "packages/core",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4", "PLC"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["packages/core/tests", "apps/api/tests"]
+addopts = "--cov=mailflow_core --cov-fail-under=80"

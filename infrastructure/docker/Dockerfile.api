@@ -1,0 +1,18 @@
+FROM python:3.13-slim
+
+WORKDIR /app
+
+RUN pip install uv
+
+COPY pyproject.toml ./
+COPY apps/api/pyproject.toml apps/api/
+COPY packages/core/pyproject.toml packages/core/
+
+RUN uv sync --no-dev
+
+COPY apps/api/app/ apps/api/app/
+COPY packages/core/mailflow_core/ packages/core/mailflow_core/
+
+EXPOSE 8000
+
+CMD ["uv", "run", "uvicorn", "apps.api.app.main:app", "--host", "0.0.0.0", "--port", "8000"]

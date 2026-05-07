@@ -1,0 +1,29 @@
+{
+  "app": {
+    "name": "MailFlow",
+    "tagline": "Open source AI email assistant"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "accounts": "Accounts",
+    "rules": "Rules",
+    "templates": "Templates",
+    "style": "Writing style",
+    "llm": "AI settings",
+    "audit": "Audit log",
+    "billing": "Billing"
+  },
+  "onboarding": {
+    "step1": "Connect your inbox",
+    "step2": "Choose your AI",
+    "step3": "Review your first email",
+    "connectGoogle": "Sign in with Google",
+    "connectMicrosoft": "Sign in with Microsoft",
+    "connectImap": "Connect via IMAP"
+  },
+  "status": {
+    "processing": "Processing...",
+    "done": "Done",
+    "error": "Error"
+  }
+}

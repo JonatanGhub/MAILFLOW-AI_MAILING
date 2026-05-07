@@ -1,0 +1,29 @@
+{
+  "app": {
+    "name": "MailFlow",
+    "tagline": "Asistente de email con IA de código abierto"
+  },
+  "nav": {
+    "dashboard": "Panel",
+    "accounts": "Cuentas",
+    "rules": "Reglas",
+    "templates": "Plantillas",
+    "style": "Estilo de escritura",
+    "llm": "Configuración de IA",
+    "audit": "Registro de auditoría",
+    "billing": "Facturación"
+  },
+  "onboarding": {
+    "step1": "Conecta tu bandeja de entrada",
+    "step2": "Elige tu IA",
+    "step3": "Revisa tu primer email",
+    "connectGoogle": "Iniciar sesión con Google",
+    "connectMicrosoft": "Iniciar sesión con Microsoft",
+    "connectImap": "Conectar vía IMAP"
+  },
+  "status": {
+    "processing": "Procesando...",
+    "done": "Completado",
+    "error": "Error"
+  }
+}

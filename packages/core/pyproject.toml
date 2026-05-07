@@ -1,0 +1,26 @@
+[project]
+name = "mailflow-core"
+version = "0.1.0"
+description = "MailFlow core domain logic — providers, classification, drafts"
+requires-python = ">=3.13"
+dependencies = [
+    "imapclient>=3.0",
+    "email-reply-parser>=0.5",
+    "beautifulsoup4>=4.12",
+    "pydantic>=2.10",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "pytest-mock>=3.14",
+    "ruff>=0.8",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4", "PLC"]

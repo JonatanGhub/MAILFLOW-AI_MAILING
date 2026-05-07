@@ -1,0 +1,10 @@
+[project]
+name = "mailflow-worker"
+version = "0.1.0"
+description = "MailFlow Worker — ARQ async job runner"
+requires-python = ">=3.13"
+dependencies = [
+    "arq>=0.26",
+    "redis>=5.2",
+    "mailflow-core",
+]

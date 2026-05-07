@@ -1,0 +1,1 @@
+"""MailFlow API — FastAPI application."""
