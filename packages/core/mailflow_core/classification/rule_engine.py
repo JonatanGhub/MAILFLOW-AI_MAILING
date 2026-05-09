@@ -20,7 +20,7 @@ class DomainRule:
 
 @dataclass(frozen=True)
 class KeywordRule:
-    keywords: list[str]
+    keywords: tuple[str, ...]
     label: str
     rule_id: str
     match_all: bool = False

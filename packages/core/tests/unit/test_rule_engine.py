@@ -40,7 +40,7 @@ def base_config(**kwargs) -> AccountConfig:
             DomainRule(domain="acmecorp.com", label="acme", rule_id="rule-1"),
         ],
         keyword_rules=[
-            KeywordRule(keywords=["urgent", "asap"], label="priority", rule_id="kw-1"),
+            KeywordRule(keywords=("urgent", "asap"), label="priority", rule_id="kw-1"),
         ],
     )
     defaults.update(kwargs)
@@ -122,7 +122,7 @@ class TestStep4Keywords:
     def test_and_match_requires_all_keywords(self):
         config = base_config(
             keyword_rules=[
-                KeywordRule(keywords=["invoice", "overdue"], label="finance", rule_id="kw-2", match_all=True)
+                KeywordRule(keywords=("invoice", "overdue"), label="finance", rule_id="kw-2", match_all=True)
             ]
         )
         engine = RuleEngine(config)
@@ -132,7 +132,7 @@ class TestStep4Keywords:
     def test_and_match_partial_does_not_match(self):
         config = base_config(
             keyword_rules=[
-                KeywordRule(keywords=["invoice", "overdue"], label="finance", rule_id="kw-2", match_all=True)
+                KeywordRule(keywords=("invoice", "overdue"), label="finance", rule_id="kw-2", match_all=True)
             ]
         )
         engine = RuleEngine(config)

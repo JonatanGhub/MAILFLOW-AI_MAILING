@@ -137,11 +137,11 @@ class ImapGenericProvider(EmailProvider):
         self._client.select_folder("INBOX")
         try:
             self._client.copy([uid], destination_folder)
+            self._client.store([uid], "+FLAGS", r"\Deleted")
+            self._client.expunge()
+            return True
         except Exception:
             return False
-        self._client.store([uid], "+FLAGS", r"\Deleted")
-        self._client.expunge()
-        return True
 
     def mark_as_processed(self, uid: int) -> None:
         self._client.select_folder("INBOX")
