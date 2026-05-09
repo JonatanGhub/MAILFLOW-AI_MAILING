@@ -137,7 +137,7 @@ class ImapGenericProvider(EmailProvider):
         self._client.select_folder("INBOX")
         try:
             self._client.copy([uid], destination_folder)
-            self._client.store([uid], "+FLAGS", r"\Deleted")
+            self._client.add_flags([uid], [r"\Deleted"])
             self._client.expunge()
             return True
         except Exception:
@@ -145,7 +145,7 @@ class ImapGenericProvider(EmailProvider):
 
     def mark_as_processed(self, uid: int) -> None:
         self._client.select_folder("INBOX")
-        self._client.store([uid], "+FLAGS", _MAILFLOW_KEYWORD)
+        self._client.add_flags([uid], [_MAILFLOW_KEYWORD])
 
     def ensure_folder_exists(self, folder_path: str) -> None:
         parts = folder_path.split(self._separator)
@@ -178,7 +178,7 @@ class ImapGenericProvider(EmailProvider):
 
     def save_draft(self, message_bytes: bytes) -> bool:
         try:
-            self._client.select_folder(self._drafts_folder)
+            self.ensure_folder_exists(self._drafts_folder)
             self._client.append(self._drafts_folder, message_bytes, flags=[r"\Draft"])
             return True
         except Exception:
@@ -187,7 +187,7 @@ class ImapGenericProvider(EmailProvider):
     def delete_draft(self, uid: int) -> bool:
         try:
             self._client.select_folder(self._drafts_folder)
-            self._client.store([uid], "+FLAGS", r"\Deleted")
+            self._client.add_flags([uid], [r"\Deleted"])
             self._client.expunge()
             return True
         except Exception:

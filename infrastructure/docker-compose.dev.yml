@@ -33,7 +33,7 @@ services:
       - "3143:3143"
       - "3025:3025"
     environment:
-      - GREENMAIL_OPTS=-Dgreenmail.setup.test.all -Dgreenmail.users=test:password:localhost
+      - GREENMAIL_OPTS=-Dgreenmail.smtp.hostname=0.0.0.0 -Dgreenmail.smtp.port=3025 -Dgreenmail.imap.hostname=0.0.0.0 -Dgreenmail.imap.port=3143 -Dgreenmail.users=test:password@localhost
 
   api:
     build:

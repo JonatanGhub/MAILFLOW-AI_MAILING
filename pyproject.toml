@@ -5,6 +5,9 @@ members = [
     "packages/core",
 ]
 
+[tool.uv.sources]
+mailflow-core = { workspace = true }
+
 [tool.ruff]
 line-length = 100
 target-version = "py313"

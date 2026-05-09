@@ -118,7 +118,7 @@ class TestMoveEmail:
         result = provider.move_email(1, "Archive")
         assert result is True
         mock_imap.copy.assert_called_once_with([1], "Archive")
-        mock_imap.store.assert_called_once_with([1], "+FLAGS", r"\Deleted")
+        mock_imap.add_flags.assert_called_once_with([1], [r"\Deleted"])
         mock_imap.expunge.assert_called_once()
 
     def test_no_expunge_when_copy_fails(self, provider, mock_imap):
@@ -131,7 +131,7 @@ class TestMoveEmail:
 class TestMarkAsProcessed:
     def test_stores_mailflow_keyword(self, provider, mock_imap):
         provider.mark_as_processed(42)
-        mock_imap.store.assert_called_once_with([42], "+FLAGS", "MailFlowProcessed")
+        mock_imap.add_flags.assert_called_once_with([42], ["MailFlowProcessed"])
 
 
 class TestSaveDraft:
@@ -166,11 +166,11 @@ class TestDeleteDraft:
     def test_marks_deleted_and_expunges(self, provider, mock_imap):
         result = provider.delete_draft(42)
         assert result is True
-        mock_imap.store.assert_called_with([42], "+FLAGS", r"\Deleted")
+        mock_imap.add_flags.assert_called_with([42], [r"\Deleted"])
         mock_imap.expunge.assert_called_once()
 
     def test_returns_false_on_error(self, provider, mock_imap):
-        mock_imap.store.side_effect = Exception("err")
+        mock_imap.add_flags.side_effect = Exception("err")
         result = provider.delete_draft(42)
         assert result is False
 
