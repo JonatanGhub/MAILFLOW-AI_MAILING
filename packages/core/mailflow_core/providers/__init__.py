@@ -8,6 +8,7 @@ Available providers (Phase 1):
     - microsoft : Microsoft 365 / Outlook (OAuth2 Authorization Code)
     - gmail     : Gmail / Google Workspace (OAuth2)
 """
+
 from .base import EmailProvider
 
 __all__ = ["EmailProvider"]

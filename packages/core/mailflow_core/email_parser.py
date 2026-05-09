@@ -1,4 +1,5 @@
 """Parses and refines EmailData into ParsedEmail."""
+
 from __future__ import annotations
 
 import re
@@ -30,11 +31,11 @@ def _normalize_subject(subject: str) -> str:
 def _strip_signature(body_text: str) -> tuple[str, str]:
     parsed = EmailReplyParser.parse_reply(body_text)
     if parsed.strip() != body_text.strip():
-        signature = body_text[len(parsed):].strip()
+        signature = body_text[len(parsed) :].strip()
         return parsed.strip(), signature
     match = _SPANISH_SIGNATURE.search(body_text)
     if match:
-        return body_text[: match.start()].strip(), body_text[match.start():].strip()
+        return body_text[: match.start()].strip(), body_text[match.start() :].strip()
     return body_text.strip(), ""
 
 

@@ -1,14 +1,25 @@
 """Deterministic classification cascade for incoming emails."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 
 from mailflow_core.types import ClassificationResult, ParsedEmail
 
-GENERIC_DOMAINS: frozenset[str] = frozenset({
-    "gmail.com", "hotmail.com", "outlook.com", "yahoo.com", "yahoo.es",
-    "icloud.com", "me.com", "protonmail.com", "proton.me", "live.com",
-})
+GENERIC_DOMAINS: frozenset[str] = frozenset(
+    {
+        "gmail.com",
+        "hotmail.com",
+        "outlook.com",
+        "yahoo.com",
+        "yahoo.es",
+        "icloud.com",
+        "me.com",
+        "protonmail.com",
+        "proton.me",
+        "live.com",
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -47,7 +58,9 @@ class RuleEngine:
         thread_history: list[ClassificationResult] | None = None,
         available_labels: list[str] | None = None,
     ) -> ClassificationResult:
-        labels = available_labels or [r.label for r in self._config.client_domain_rules] + ["unclassified"]
+        labels = available_labels or [r.label for r in self._config.client_domain_rules] + [
+            "unclassified"
+        ]
 
         # Step 1: internal domain
         if email.from_domain in self._config.internal_domains:
@@ -58,7 +71,10 @@ class RuleEngine:
             for rule in self._config.client_domain_rules:
                 if rule.domain == email.from_domain:
                     return ClassificationResult(
-                        label=rule.label, confidence=0.95, method="domain_client", rule_id=rule.rule_id
+                        label=rule.label,
+                        confidence=0.95,
+                        method="domain_client",
+                        rule_id=rule.rule_id,
                     )
 
         # Step 3: thread inheritance (most recent entry)
@@ -71,7 +87,11 @@ class RuleEngine:
         search_text = f"{email.subject_normalized} {email.body_text}".lower()
         for rule in self._config.keyword_rules:
             kws = [k.lower() for k in rule.keywords]
-            matched = all(k in search_text for k in kws) if rule.match_all else any(k in search_text for k in kws)
+            matched = (
+                all(k in search_text for k in kws)
+                if rule.match_all
+                else any(k in search_text for k in kws)
+            )
             if matched:
                 return ClassificationResult(
                     label=rule.label, confidence=0.80, method="keyword", rule_id=rule.rule_id

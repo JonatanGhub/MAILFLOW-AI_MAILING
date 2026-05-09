@@ -1,4 +1,5 @@
 """IMAP email provider with password authentication."""
+
 from __future__ import annotations
 
 import email
@@ -85,7 +86,9 @@ class ImapGenericProvider(EmailProvider):
         folders = self._client.list_folders()
         if folders:
             _, delimiter, _ = folders[0]
-            self._separator = delimiter.decode() if isinstance(delimiter, bytes) else (delimiter or "/")
+            self._separator = (
+                delimiter.decode() if isinstance(delimiter, bytes) else (delimiter or "/")
+            )
 
     def _detect_drafts_folder(self) -> None:
         for flags, _, name in self._client.list_folders():

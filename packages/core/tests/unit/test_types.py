@@ -1,5 +1,8 @@
 """Tests for shared DTOs."""
+
 from __future__ import annotations
+
+from dataclasses import FrozenInstanceError
 
 import pytest
 
@@ -17,7 +20,7 @@ class TestParsedEmail:
             from_email="a@b.com",
             from_domain="b.com",
         )
-        with pytest.raises(Exception):
+        with pytest.raises(FrozenInstanceError):
             email.uid = 99  # type: ignore[misc]
 
     def test_defaults(self) -> None:
@@ -39,7 +42,7 @@ class TestParsedEmail:
 class TestClassificationResult:
     def test_immutable(self) -> None:
         result = ClassificationResult(label="acme", confidence=0.9, method="domain_client")
-        with pytest.raises(Exception):
+        with pytest.raises(FrozenInstanceError):
             result.label = "other"  # type: ignore[misc]
 
     def test_rule_id_defaults_none(self) -> None:
@@ -58,5 +61,5 @@ class TestDraftRequest:
             body_html=None,
             classification=cr,
         )
-        with pytest.raises(Exception):
+        with pytest.raises(FrozenInstanceError):
             req.subject = "other"  # type: ignore[misc]

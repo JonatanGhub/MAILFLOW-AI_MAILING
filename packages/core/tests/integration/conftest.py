@@ -1,4 +1,5 @@
 """Pytest fixtures for IMAP integration tests against greenmail."""
+
 from __future__ import annotations
 
 import smtplib
@@ -13,7 +14,7 @@ from mailflow_core.providers.imap_generic import ImapGenericProvider
 GREENMAIL_HOST = "localhost"
 IMAP_PORT = 3143
 SMTP_PORT = 3025
-TEST_LOGIN = "test"           # IMAP login (bare username, not email)
+TEST_LOGIN = "test"  # IMAP login (bare username, not email)
 TEST_EMAIL = "test@localhost"  # email address for SMTP delivery
 TEST_PASS = "password"
 

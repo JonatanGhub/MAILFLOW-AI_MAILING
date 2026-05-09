@@ -1,4 +1,5 @@
 """Tests for EmailParser — subject normalization, signature stripping, thread resolution."""
+
 from __future__ import annotations
 
 import pytest
@@ -8,37 +9,40 @@ from mailflow_core.providers.base import EmailData
 
 
 def make_email(**kwargs) -> EmailData:
-    defaults = dict(
-        uid=1,
-        message_id="<msg@host>",
-        subject="Test",
-        from_email="sender@client.com",
-        to_emails=["me@company.com"],
-        body_text="This is the body.",
-        body_html="",
-        in_reply_to=None,
-        references=[],
-        date=None,
-    )
+    defaults = {
+        "uid": 1,
+        "message_id": "<msg@host>",
+        "subject": "Test",
+        "from_email": "sender@client.com",
+        "to_emails": ["me@company.com"],
+        "body_text": "This is the body.",
+        "body_html": "",
+        "in_reply_to": None,
+        "references": [],
+        "date": None,
+    }
     defaults.update(kwargs)
     return EmailData(**defaults)
 
 
 class TestSubjectNormalization:
-    @pytest.mark.parametrize("prefix,expected", [
-        ("Re: Meeting notes", "Meeting notes"),
-        ("re: Meeting notes", "Meeting notes"),
-        ("RE: Meeting notes", "Meeting notes"),
-        ("RV: Oferta comercial", "Oferta comercial"),
-        ("Fwd: Newsletter", "Newsletter"),
-        ("FW: Budget Q1", "Budget Q1"),
-        ("Ref: Contract", "Contract"),
-        ("AW: Anfrage", "Anfrage"),
-        ("TR: Projet", "Projet"),
-        ("Re: Fwd: Re: Deep thread", "Deep thread"),
-        ("Meeting notes", "Meeting notes"),
-        ("", ""),
-    ])
+    @pytest.mark.parametrize(
+        "prefix,expected",
+        [
+            ("Re: Meeting notes", "Meeting notes"),
+            ("re: Meeting notes", "Meeting notes"),
+            ("RE: Meeting notes", "Meeting notes"),
+            ("RV: Oferta comercial", "Oferta comercial"),
+            ("Fwd: Newsletter", "Newsletter"),
+            ("FW: Budget Q1", "Budget Q1"),
+            ("Ref: Contract", "Contract"),
+            ("AW: Anfrage", "Anfrage"),
+            ("TR: Projet", "Projet"),
+            ("Re: Fwd: Re: Deep thread", "Deep thread"),
+            ("Meeting notes", "Meeting notes"),
+            ("", ""),
+        ],
+    )
     def test_strips_prefix(self, prefix, expected):
         parser = EmailParser()
         parsed = parser.parse(make_email(subject=prefix))

@@ -1,4 +1,5 @@
 """Unit tests for ImapGenericProvider using mocked imapclient."""
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch

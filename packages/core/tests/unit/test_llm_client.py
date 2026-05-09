@@ -1,4 +1,5 @@
 """Tests for LLMClient — classify and generate_draft via litellm."""
+
 from __future__ import annotations
 
 import json
@@ -12,27 +13,39 @@ from mailflow_core.types import ClassificationResult, DraftRequest, ParsedEmail
 
 
 def cfg(**kwargs) -> LLMConfig:
-    defaults = dict(model_id="ollama/llama3", api_base="http://localhost:11434")
+    defaults = {"model_id": "ollama/llama3", "api_base": "http://localhost:11434"}
     defaults.update(kwargs)
     return LLMConfig(**defaults)
 
 
 def make_email(**kwargs) -> ParsedEmail:
-    defaults = dict(
-        uid=1, subject_normalized="Invoice due", body_text="Please send the invoice.",
-        body_html="", signature="", from_email="client@acme.com", from_domain="acme.com",
-        to_emails=["me@co.com"], in_reply_to=None, thread_id=None, date=None,
-    )
+    defaults = {
+        "uid": 1,
+        "subject_normalized": "Invoice due",
+        "body_text": "Please send the invoice.",
+        "body_html": "",
+        "signature": "",
+        "from_email": "client@acme.com",
+        "from_domain": "acme.com",
+        "to_emails": ["me@co.com"],
+        "in_reply_to": None,
+        "thread_id": None,
+        "date": None,
+    }
     defaults.update(kwargs)
     return ParsedEmail(**defaults)
 
 
 def make_request(**kwargs) -> DraftRequest:
     cr = ClassificationResult(label="acme", confidence=0.95, method="domain_client")
-    defaults = dict(
-        in_reply_to_uid="1", folder="Drafts", subject="Re: Invoice due",
-        body_text="Here is the invoice.", body_html=None, classification=cr,
-    )
+    defaults = {
+        "in_reply_to_uid": "1",
+        "folder": "Drafts",
+        "subject": "Re: Invoice due",
+        "body_text": "Here is the invoice.",
+        "body_html": None,
+        "classification": cr,
+    }
     defaults.update(kwargs)
     return DraftRequest(**defaults)
 
@@ -63,7 +76,9 @@ class TestClassify:
     def test_label_not_in_available_raises_classification_error(self):
         client = LLMClient(cfg())
         with patch("mailflow_core.classification.llm_client.litellm.completion") as mock_c:
-            mock_c.return_value = fake_completion(json.dumps({"label": "unknown", "confidence": 0.9}))
+            mock_c.return_value = fake_completion(
+                json.dumps({"label": "unknown", "confidence": 0.9})
+            )
             with pytest.raises(ClassificationError):
                 client.classify(make_email(), available_labels=["acme", "internal"])
 

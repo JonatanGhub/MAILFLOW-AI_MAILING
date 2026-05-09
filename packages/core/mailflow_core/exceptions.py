@@ -1,4 +1,5 @@
 """Domain exceptions for MailFlow core."""
+
 from __future__ import annotations
 
 

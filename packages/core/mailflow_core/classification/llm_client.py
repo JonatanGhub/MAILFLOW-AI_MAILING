@@ -1,4 +1,5 @@
 """LiteLLM wrapper for email classification and draft generation."""
+
 from __future__ import annotations
 
 import json
@@ -62,10 +63,12 @@ class LLMClient:
             f"From: {email.from_email}\n\n"
             f"{email.body_text[:500]}"
         )
-        raw = self._call([
-            {"role": "system", "content": _CLASSIFY_SYSTEM},
-            {"role": "user", "content": user_msg},
-        ])
+        raw = self._call(
+            [
+                {"role": "system", "content": _CLASSIFY_SYSTEM},
+                {"role": "user", "content": user_msg},
+            ]
+        )
         try:
             data = json.loads(raw)
             label = data["label"]
@@ -73,7 +76,9 @@ class LLMClient:
         except (json.JSONDecodeError, KeyError, ValueError) as exc:
             raise ClassificationError(f"Invalid LLM response: {raw!r}") from exc
         if label not in available_labels:
-            raise ClassificationError(f"Label {label!r} not in available labels: {available_labels}")
+            raise ClassificationError(
+                f"Label {label!r} not in available labels: {available_labels}"
+            )
         return ClassificationResult(label=label, confidence=confidence, method="llm")
 
     def generate_draft(self, original_email: ParsedEmail, request: DraftRequest) -> str:
@@ -84,7 +89,9 @@ class LLMClient:
             f"Classification: {request.classification.label}\n"
             f"Reply subject: {request.subject}"
         )
-        return self._call([
-            {"role": "system", "content": _DRAFT_SYSTEM},
-            {"role": "user", "content": user_msg},
-        ])
+        return self._call(
+            [
+                {"role": "system", "content": _DRAFT_SYSTEM},
+                {"role": "user", "content": user_msg},
+            ]
+        )

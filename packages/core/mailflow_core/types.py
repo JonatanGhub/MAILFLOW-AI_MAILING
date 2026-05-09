@@ -1,4 +1,5 @@
 """Shared DTOs used across all core modules."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

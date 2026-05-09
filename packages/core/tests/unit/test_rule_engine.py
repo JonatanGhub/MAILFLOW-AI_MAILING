@@ -1,4 +1,5 @@
 """Tests for RuleEngine classification cascade."""
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock
@@ -15,34 +16,34 @@ from mailflow_core.types import ClassificationResult, ParsedEmail
 
 
 def make_email(**kwargs) -> ParsedEmail:
-    defaults = dict(
-        uid=1,
-        subject_normalized="Project proposal",
-        body_text="Please review the attached proposal.",
-        body_html="",
-        signature="",
-        from_email="contact@acmecorp.com",
-        from_domain="acmecorp.com",
-        to_emails=["me@company.com"],
-        in_reply_to=None,
-        thread_id=None,
-        date=None,
-    )
+    defaults = {
+        "uid": 1,
+        "subject_normalized": "Project proposal",
+        "body_text": "Please review the attached proposal.",
+        "body_html": "",
+        "signature": "",
+        "from_email": "contact@acmecorp.com",
+        "from_domain": "acmecorp.com",
+        "to_emails": ["me@company.com"],
+        "in_reply_to": None,
+        "thread_id": None,
+        "date": None,
+    }
     defaults.update(kwargs)
     return ParsedEmail(**defaults)
 
 
 def base_config(**kwargs) -> AccountConfig:
-    defaults = dict(
-        account_id="acc-1",
-        internal_domains=["company.com"],
-        client_domain_rules=[
+    defaults = {
+        "account_id": "acc-1",
+        "internal_domains": ["company.com"],
+        "client_domain_rules": [
             DomainRule(domain="acmecorp.com", label="acme", rule_id="rule-1"),
         ],
-        keyword_rules=[
+        "keyword_rules": [
             KeywordRule(keywords=("urgent", "asap"), label="priority", rule_id="kw-1"),
         ],
-    )
+    }
     defaults.update(kwargs)
     return AccountConfig(**defaults)
 
@@ -65,11 +66,21 @@ class TestStep2ClientDomain:
         assert result.method == "domain_client"
         assert result.rule_id == "rule-1"
 
-    @pytest.mark.parametrize("domain", [
-        "gmail.com", "hotmail.com", "outlook.com", "yahoo.com",
-        "yahoo.es", "icloud.com", "me.com", "protonmail.com",
-        "proton.me", "live.com",
-    ])
+    @pytest.mark.parametrize(
+        "domain",
+        [
+            "gmail.com",
+            "hotmail.com",
+            "outlook.com",
+            "yahoo.com",
+            "yahoo.es",
+            "icloud.com",
+            "me.com",
+            "protonmail.com",
+            "proton.me",
+            "live.com",
+        ],
+    )
     def test_generic_domains_not_matched_as_client(self, domain):
         config = base_config(
             client_domain_rules=[DomainRule(domain=domain, label="generic", rule_id="r1")]
@@ -109,62 +120,86 @@ class TestStep3ThreadInheritance:
 class TestStep4Keywords:
     def test_or_match_first_keyword(self):
         engine = RuleEngine(base_config())
-        result = engine.classify(make_email(from_domain="unknown.net", subject_normalized="URGENT request"))
+        result = engine.classify(
+            make_email(from_domain="unknown.net", subject_normalized="URGENT request")
+        )
         assert result.label == "priority"
         assert result.confidence == 0.80
         assert result.method == "keyword"
 
     def test_or_match_second_keyword(self):
         engine = RuleEngine(base_config())
-        result = engine.classify(make_email(from_domain="unknown.net", body_text="we need this asap"))
+        result = engine.classify(
+            make_email(from_domain="unknown.net", body_text="we need this asap")
+        )
         assert result.label == "priority"
 
     def test_and_match_requires_all_keywords(self):
         config = base_config(
             keyword_rules=[
-                KeywordRule(keywords=("invoice", "overdue"), label="finance", rule_id="kw-2", match_all=True)
+                KeywordRule(
+                    keywords=("invoice", "overdue"), label="finance", rule_id="kw-2", match_all=True
+                )
             ]
         )
         engine = RuleEngine(config)
-        result = engine.classify(make_email(from_domain="unknown.net", body_text="The invoice is overdue."))
+        result = engine.classify(
+            make_email(from_domain="unknown.net", body_text="The invoice is overdue.")
+        )
         assert result.label == "finance"
 
     def test_and_match_partial_does_not_match(self):
         config = base_config(
             keyword_rules=[
-                KeywordRule(keywords=("invoice", "overdue"), label="finance", rule_id="kw-2", match_all=True)
+                KeywordRule(
+                    keywords=("invoice", "overdue"), label="finance", rule_id="kw-2", match_all=True
+                )
             ]
         )
         engine = RuleEngine(config)
-        result = engine.classify(make_email(from_domain="unknown.net", body_text="The invoice is pending."))
+        result = engine.classify(
+            make_email(from_domain="unknown.net", body_text="The invoice is pending.")
+        )
         assert result.method != "keyword"
 
     def test_keyword_case_insensitive(self):
         engine = RuleEngine(base_config())
-        result = engine.classify(make_email(from_domain="unknown.net", subject_normalized="URGENT matter"))
+        result = engine.classify(
+            make_email(from_domain="unknown.net", subject_normalized="URGENT matter")
+        )
         assert result.method == "keyword"
 
 
 class TestStep5LLMFallback:
     def test_uses_llm_when_no_rule_matches(self):
         mock_llm = MagicMock()
-        mock_llm.classify.return_value = ClassificationResult(label="acme", confidence=0.75, method="llm")
-        engine = RuleEngine(base_config(client_domain_rules=[], keyword_rules=[]), llm_client=mock_llm)
+        mock_llm.classify.return_value = ClassificationResult(
+            label="acme", confidence=0.75, method="llm"
+        )
+        engine = RuleEngine(
+            base_config(client_domain_rules=[], keyword_rules=[]), llm_client=mock_llm
+        )
         result = engine.classify(make_email(from_domain="unknown.net"))
         assert result.method == "llm"
         assert result.label == "acme"
 
     def test_low_confidence_llm_falls_to_fallback(self):
         mock_llm = MagicMock()
-        mock_llm.classify.return_value = ClassificationResult(label="maybe", confidence=0.40, method="llm")
-        engine = RuleEngine(base_config(client_domain_rules=[], keyword_rules=[]), llm_client=mock_llm)
+        mock_llm.classify.return_value = ClassificationResult(
+            label="maybe", confidence=0.40, method="llm"
+        )
+        engine = RuleEngine(
+            base_config(client_domain_rules=[], keyword_rules=[]), llm_client=mock_llm
+        )
         result = engine.classify(make_email(from_domain="unknown.net"))
         assert result.method == "fallback"
 
     def test_llm_exception_falls_to_fallback(self):
         mock_llm = MagicMock()
         mock_llm.classify.side_effect = Exception("LLM unavailable")
-        engine = RuleEngine(base_config(client_domain_rules=[], keyword_rules=[]), llm_client=mock_llm)
+        engine = RuleEngine(
+            base_config(client_domain_rules=[], keyword_rules=[]), llm_client=mock_llm
+        )
         result = engine.classify(make_email(from_domain="unknown.net"))
         assert result.method == "fallback"
 
