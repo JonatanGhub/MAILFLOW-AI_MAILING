@@ -42,7 +42,7 @@ from typing import Literal
 
 @dataclass(frozen=True)
 class ParsedEmail:
-    uid: str
+    uid: int                    # consistente con EmailData.uid (int)
     subject_normalized: str     # sin Re:/Fwd:/RV:/FW:/Ref:/AW:/TR: (bucle, case-insensitive)
     body_text: str              # limpio, sin firma, sin quoted reply
     body_html: str
@@ -120,19 +120,26 @@ class ImapGenericProvider(EmailProvider):
 | Anti-colisión borradores | Buscar `DraftRef` existente antes de `APPEND`; lanzar `DraftCollisionError` si ya existe |
 | Keepalive | `NOOP` sin efecto si no está conectado |
 
-### 4.3 Métodos
+### 4.3 Métodos (signaturas exactas de base.py)
 
 ```python
 def connect(self) -> None
 def disconnect(self) -> None
-def fetch_unprocessed(self, folder: str) -> list[EmailData]
-    # SEARCH UID NOT KEYWORD MailFlowProcessed
-def move_email(self, uid: str, from_folder: str, to_folder: str) -> None
-def save_draft(self, request: DraftRequest) -> DraftRef
-def find_draft(self, in_reply_to_uid: str, folder: str) -> DraftRef | None
-def delete_draft(self, ref: DraftRef) -> None
-def create_folder(self, path: str) -> None
-def keepalive(self) -> None
+def keep_alive(self) -> None
+def fetch_unprocessed_emails(self, max_count: int = 20) -> list[EmailData]
+    # SEARCH NOT KEYWORD MailFlowProcessed, FIFO, límite max_count
+def move_email(self, uid: int, destination_folder: str) -> bool
+    # COPY → STORE \Deleted → EXPUNGE; False si COPY falla (no hace EXPUNGE)
+def mark_as_processed(self, uid: int) -> None
+    # STORE +FLAGS MailFlowProcessed
+def ensure_folder_exists(self, folder_path: str) -> None
+    # Crea jerarquía nivel a nivel si no existe
+def find_drafts_in_thread(self, original_message_id: str) -> list[DraftRef]
+    # Busca en Drafts por In-Reply-To == original_message_id (ADR-004)
+def save_draft(self, message_bytes: bytes) -> bool
+    # APPEND al Drafts folder con flag \Draft
+def delete_draft(self, uid: int) -> bool
+    # STORE \Deleted + EXPUNGE sobre uid en Drafts
 ```
 
 ---
@@ -143,21 +150,22 @@ def keepalive(self) -> None
 
 ```python
 class EmailParser:
-    def parse(self, raw_message: bytes) -> ParsedEmail: ...
+    def parse(self, email_data: EmailData) -> ParsedEmail: ...
 ```
 
+Recibe `EmailData` (ya fetcheado por el provider) y devuelve `ParsedEmail` refinado.
 Sin estado. Reusable. No lanza excepciones salvo formato completamente inválido (`MailFlowError`).
 
 ### 5.2 Pipeline
 
-1. `email.message_from_bytes()` — extrae headers y partes MIME
-2. Extraer `body_text` y `body_html` de las partes `text/plain` y `text/html`
-3. `email_reply_parser.EmailReplyParser.parse_reply(body_text)` — extrae solo la respuesta nueva
-4. Fallback castellano: si el parser no detecta firma, regex sobre patrones `"Saludos,"`, `"Atentamente,"`, `"Un saludo,"`, `"Gracias,"` seguidos de salto de línea
-5. Normalización de asunto: bucle hasta que no haya cambios:
+Entrada: `EmailData` (campos ya extraídos por el provider).
+
+1. `email_reply_parser.EmailReplyParser.parse_reply(email_data.body_text)` — extrae solo la respuesta nueva, separa firma
+2. Fallback castellano: si `email_reply_parser` no detecta firma, aplicar regex sobre `"Saludos,"`, `"Atentamente,"`, `"Un saludo,"`, `"Gracias,"` seguidos de salto de línea
+3. Normalización de asunto: bucle hasta que no haya cambios:
    - Quitar al inicio (case-insensitive, con espacio opcional): `Re:` `RV:` `Fwd:` `FW:` `Ref:` `AW:` `TR:`
-6. Extraer `from_domain` desde `from_email.split("@")[-1].lower()`
-7. Resolver `thread_id` desde header `References` (primer message-id) → `In-Reply-To` → `None`
+4. Extraer `from_domain` desde `email_data.from_email.split("@")[-1].lower()`
+5. Resolver `thread_id` desde `email_data.references[0]` si hay referencias → `email_data.in_reply_to` → `None`
 
 ### 5.3 Casos de borde
 
