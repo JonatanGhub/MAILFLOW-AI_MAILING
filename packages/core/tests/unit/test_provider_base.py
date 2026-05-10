@@ -1,5 +1,8 @@
 """Tests for the abstract EmailProvider interface and EmailData DTO."""
+
 from __future__ import annotations
+
+from dataclasses import FrozenInstanceError
 
 import pytest
 
@@ -54,7 +57,7 @@ class TestEmailDataDTO:
             body_text="Hello",
             body_html="<p>Hello</p>",
         )
-        with pytest.raises(Exception):  # frozen dataclass raises FrozenInstanceError
+        with pytest.raises(FrozenInstanceError):
             data.uid = 99  # type: ignore[misc]
 
     def test_defaults(self) -> None:
@@ -90,7 +93,7 @@ class TestEmailProviderContextManager:
 class TestDraftRef:
     def test_immutable(self) -> None:
         ref = DraftRef(uid=1, folder="Drafts", message_id="<x>", in_reply_to=None)
-        with pytest.raises(Exception):
+        with pytest.raises(FrozenInstanceError):
             ref.uid = 99  # type: ignore[misc]
 
     def test_default_has_mailflow_header(self) -> None:

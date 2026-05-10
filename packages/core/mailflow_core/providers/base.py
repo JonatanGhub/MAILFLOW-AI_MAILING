@@ -3,6 +3,7 @@
 All concrete providers (IMAP, Microsoft, Gmail) must implement this interface.
 The API and worker depend only on this abstraction — never on concrete classes.
 """
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -51,7 +52,7 @@ class EmailProvider(ABC):
     def disconnect(self) -> None:
         """Logout and close the IMAP connection."""
 
-    def __enter__(self) -> "EmailProvider":
+    def __enter__(self) -> EmailProvider:
         self.connect()
         return self
 

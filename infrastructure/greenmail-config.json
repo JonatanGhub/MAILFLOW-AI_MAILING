@@ -1,0 +1,9 @@
+{
+  "users": [
+    {"email": "test@localhost", "login": "test", "password": "password"}
+  ],
+  "serverSetup": [
+    {"protocol": "smtp", "port": 3025, "bindAddress": "0.0.0.0", "isSSL": false},
+    {"protocol": "imap", "port": 3143, "bindAddress": "0.0.0.0", "isSSL": false}
+  ]
+}
