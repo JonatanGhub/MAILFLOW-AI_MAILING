@@ -38,3 +38,11 @@ def test_encrypt_returns_different_tokens_each_call():
     key = Fernet.generate_key().decode()
     data = {"password": "pw"}
     assert encrypt(data, key) != encrypt(data, key)
+
+
+def test_decrypt_corrupted_token_raises():
+    from app.crypto import decrypt
+    from cryptography.fernet import Fernet, InvalidToken
+    key = Fernet.generate_key().decode()
+    with pytest.raises(InvalidToken):
+        decrypt("this-is-not-a-fernet-token", key)
