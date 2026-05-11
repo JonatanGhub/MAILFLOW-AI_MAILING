@@ -1013,6 +1013,7 @@ dependencies = [
     { name = "arq" },
     { name = "asyncpg" },
     { name = "beautifulsoup4" },
+    { name = "cryptography" },
     { name = "email-reply-parser" },
     { name = "fastapi" },
     { name = "google-auth" },
@@ -1044,6 +1045,7 @@ requires-dist = [
     { name = "arq", specifier = ">=0.26" },
     { name = "asyncpg", specifier = ">=0.30" },
     { name = "beautifulsoup4", specifier = ">=4.12" },
+    { name = "cryptography", specifier = ">=43.0" },
     { name = "email-reply-parser", specifier = ">=0.5" },
     { name = "fastapi", specifier = ">=0.115" },
     { name = "google-auth", specifier = ">=2.38" },
@@ -1107,6 +1109,7 @@ version = "0.1.0"
 source = { virtual = "apps/worker" }
 dependencies = [
     { name = "arq" },
+    { name = "mailflow-api" },
     { name = "mailflow-core" },
     { name = "redis" },
 ]
@@ -1114,6 +1117,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "arq", specifier = ">=0.26" },
+    { name = "mailflow-api", virtual = "apps/api" },
     { name = "mailflow-core", virtual = "packages/core" },
     { name = "redis", specifier = ">=5.2" },
 ]
