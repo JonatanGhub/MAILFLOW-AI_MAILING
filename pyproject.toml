@@ -7,6 +7,7 @@ members = [
 
 [tool.uv.sources]
 mailflow-core = { workspace = true }
+mailflow-api = { workspace = true }
 
 [tool.ruff]
 line-length = 100
@@ -18,4 +19,5 @@ ignore = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["packages/core/tests", "apps/api/tests"]
+asyncio_mode = "auto"
 addopts = "--cov=mailflow_core --cov-fail-under=80"
