@@ -148,26 +148,27 @@ class CycleService:
         # ── 4. Fetch + loop (sin sesión DB abierta durante IMAP) ────────────
         emails: list[EmailData] = []
         try:
-            provider.connect()
-            emails = provider.fetch_unprocessed_emails()
-        except Exception as exc:
-            stats["last_error"] = str(exc)
-            stats["errors"] += 1
-            log.exception("IMAP fetch failed for account %s: %s", account_id, exc)
-
-        for email_data in emails:
             try:
-                await _process_one(
-                    email_data, account, cycle_id,
-                    provider, parser, rule_engine, generate_client,
-                    stats, self._sf,
-                )
+                provider.connect()
+                emails = provider.fetch_unprocessed_emails()
             except Exception as exc:
-                stats["errors"] += 1
                 stats["last_error"] = str(exc)
-                log.exception("Error processing uid=%s: %s", email_data.uid, exc)
+                stats["errors"] += 1
+                log.exception("IMAP fetch failed for account %s: %s", account_id, exc)
 
-        provider.disconnect()
+            for email_data in emails:
+                try:
+                    await _process_one(
+                        email_data, account, cycle_id,
+                        provider, parser, rule_engine, generate_client,
+                        stats, self._sf,
+                    )
+                except Exception as exc:
+                    stats["errors"] += 1
+                    stats["last_error"] = str(exc)
+                    log.exception("Error processing uid=%s: %s", email_data.uid, exc)
+        finally:
+            provider.disconnect()
 
         # ── 5. Finalizar audit_log ──────────────────────────────────────────
         duration_ms = int((time.monotonic() - start) * 1000)
