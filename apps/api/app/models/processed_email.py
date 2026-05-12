@@ -5,8 +5,15 @@ from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import (
-    BigInteger, Boolean, DateTime, Float, ForeignKey, Index,
-    String, UniqueConstraint, func,
+    BigInteger,
+    Boolean,
+    DateTime,
+    Float,
+    ForeignKey,
+    Index,
+    String,
+    UniqueConstraint,
+    func,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 

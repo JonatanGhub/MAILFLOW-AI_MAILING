@@ -4,13 +4,15 @@ Requiere: docker compose up -d postgres
 """
 from __future__ import annotations
 
-import pytest
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
-from app.models.organization import Organization
+import pytest
 from app.models.email_account import EmailAccount
-from app.models.rules import DomainRule as DbDomainRule, KeywordRule as DbKeywordRule, InternalDomain
+from app.models.organization import Organization
+from app.models.rules import DomainRule as DbDomainRule
+from app.models.rules import InternalDomain
+from app.models.rules import KeywordRule as DbKeywordRule
 from app.repositories.account import AccountRepository
 from mailflow_core.classification.rule_engine import AccountConfig
 
@@ -49,7 +51,7 @@ async def account(session, org):
 
 async def test_get_accounts_due_includes_never_run(session, account):
     repo = AccountRepository(session)
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
     result = await repo.get_accounts_due(now)
     ids = [a.id for a in result]
     assert account.id in ids
@@ -57,21 +59,21 @@ async def test_get_accounts_due_includes_never_run(session, account):
 
 async def test_get_accounts_due_includes_overdue(session, account):
     # last_cycle_at hace 10 min, interval=5 → debe estar en la lista
-    account.last_cycle_at = datetime.now(tz=timezone.utc) - timedelta(minutes=10)
+    account.last_cycle_at = datetime.now(tz=UTC) - timedelta(minutes=10)
     await session.commit()
 
     repo = AccountRepository(session)
-    result = await repo.get_accounts_due(datetime.now(tz=timezone.utc))
+    result = await repo.get_accounts_due(datetime.now(tz=UTC))
     assert account.id in [a.id for a in result]
 
 
 async def test_get_accounts_due_excludes_recent(session, account):
     # last_cycle_at hace 2 min, interval=5 → NO debe estar
-    account.last_cycle_at = datetime.now(tz=timezone.utc) - timedelta(minutes=2)
+    account.last_cycle_at = datetime.now(tz=UTC) - timedelta(minutes=2)
     await session.commit()
 
     repo = AccountRepository(session)
-    result = await repo.get_accounts_due(datetime.now(tz=timezone.utc))
+    result = await repo.get_accounts_due(datetime.now(tz=UTC))
     assert account.id not in [a.id for a in result]
 
 
@@ -80,7 +82,7 @@ async def test_get_accounts_due_excludes_inactive(session, account):
     await session.commit()
 
     repo = AccountRepository(session)
-    result = await repo.get_accounts_due(datetime.now(tz=timezone.utc))
+    result = await repo.get_accounts_due(datetime.now(tz=UTC))
     assert account.id not in [a.id for a in result]
 
 
@@ -88,14 +90,14 @@ async def test_get_accounts_due_excludes_inactive(session, account):
 
 async def test_claim_cycle_returns_true_first_call(session, account):
     repo = AccountRepository(session)
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
     won = await repo.claim_cycle(account.id, now)
     assert won is True
 
 
 async def test_claim_cycle_returns_false_second_call(session_factory, account):
     """Dos workers intentan claim al mismo tiempo → solo uno gana."""
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
     async with session_factory() as s1:
         won1 = await AccountRepository(s1).claim_cycle(account.id, now)
         await s1.commit()

@@ -4,18 +4,24 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
 
+from mailflow_core.classification.rule_engine import (
+    AccountConfig,
+)
+from mailflow_core.classification.rule_engine import (
+    DomainRule as CoreDomainRule,
+)
+from mailflow_core.classification.rule_engine import (
+    KeywordRule as CoreKeywordRule,
+)
 from sqlalchemy import or_, select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models.email_account import EmailAccount
 from app.models.llm_provider import LLMProvider
-from app.models.rules import DomainRule as DbDomainRule, InternalDomain, KeywordRule as DbKeywordRule
-from mailflow_core.classification.rule_engine import (
-    AccountConfig,
-    DomainRule as CoreDomainRule,
-    KeywordRule as CoreKeywordRule,
-)
+from app.models.rules import DomainRule as DbDomainRule
+from app.models.rules import InternalDomain
+from app.models.rules import KeywordRule as DbKeywordRule
 
 
 class AccountRepository:

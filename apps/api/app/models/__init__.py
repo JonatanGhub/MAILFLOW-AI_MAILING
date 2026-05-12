@@ -1,6 +1,6 @@
 """Re-exports para que Alembic pueda descubrir todos los modelos via Base.metadata."""
-from app.models.base import Base
 from app.models.audit_log import AuditLog
+from app.models.base import Base
 from app.models.email_account import EmailAccount
 from app.models.llm_provider import LLMProvider
 from app.models.organization import Organization

@@ -1,15 +1,14 @@
 """Tests de CycleRepository con Postgres real."""
 from __future__ import annotations
 
-import pytest
-from datetime import datetime, timezone
 from uuid import uuid4
 
-from app.models.organization import Organization
-from app.models.email_account import EmailAccount
-from app.models.audit_log import AuditLog
-from app.repositories.cycle import CycleRepository
+import pytest
 from app.crypto import encrypt
+from app.models.audit_log import AuditLog
+from app.models.email_account import EmailAccount
+from app.models.organization import Organization
+from app.repositories.cycle import CycleRepository
 
 TEST_SECRET_KEY = "qdCa5nGhLjd8qY0CCaQP2dE000lbSYDmtPnhzAVeVgs="
 
@@ -89,8 +88,8 @@ async def test_insert_processed_idempotent(session, account):
     await repo.insert_processed(**kwargs)
     await session.commit()
 
-    from sqlalchemy import select, func
     from app.models.processed_email import ProcessedEmail
+    from sqlalchemy import func, select
     count = (
         await session.execute(
             select(func.count()).where(ProcessedEmail.account_id == account.id)

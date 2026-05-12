@@ -12,11 +12,17 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from uuid import UUID, uuid4
 
+from mailflow_core.classification.llm_client import LLMClient, LLMConfig
+from mailflow_core.classification.rule_engine import RuleEngine
+from mailflow_core.email_parser import EmailParser
+from mailflow_core.providers.base import EmailData
+from mailflow_core.providers.imap_generic import ImapGenericProvider
+from mailflow_core.types import ClassificationResult, DraftRequest, ParsedEmail
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from app.config import settings
@@ -25,12 +31,6 @@ from app.models.email_account import EmailAccount
 from app.models.llm_provider import LLMProvider
 from app.repositories.account import AccountRepository
 from app.repositories.cycle import CycleRepository
-from mailflow_core.classification.llm_client import LLMClient, LLMConfig
-from mailflow_core.classification.rule_engine import AccountConfig, RuleEngine
-from mailflow_core.email_parser import EmailParser
-from mailflow_core.providers.base import EmailData
-from mailflow_core.providers.imap_generic import ImapGenericProvider
-from mailflow_core.types import ClassificationResult, DraftRequest, ParsedEmail
 
 log = logging.getLogger("mailflow.cycle")
 
@@ -111,7 +111,7 @@ class CycleService:
         stats: dict = {"emails": 0, "drafts": 0, "errors": 0, "last_error": None}
 
         # ── 0. Claim cycle — guard TOCTOU atómico ──────────────────────────
-        now = datetime.now(tz=timezone.utc)
+        now = datetime.now(tz=UTC)
         async with self._sf() as session:
             won = await AccountRepository(session).claim_cycle(account_id, now)
         if not won:

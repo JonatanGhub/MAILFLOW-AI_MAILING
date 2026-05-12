@@ -8,6 +8,7 @@ from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, uuid_pk
+from app.models.llm_provider import LLMProvider
 
 
 class EmailAccount(Base):
@@ -37,7 +38,7 @@ class EmailAccount(Base):
     )
 
     # Nunca auto-loaded; usar selectinload explícito en AccountRepository.get_full_config
-    llm_provider: Mapped["LLMProvider | None"] = relationship(
+    llm_provider: Mapped[LLMProvider | None] = relationship(
         "LLMProvider",
         foreign_keys=[llm_provider_id],
         lazy="noload",

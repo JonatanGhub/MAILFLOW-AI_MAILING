@@ -1,15 +1,12 @@
 """Tests unitarios de CycleService — todo mockeado (sin DB ni IMAP real)."""
 from __future__ import annotations
 
-import pytest
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, call, patch
-from uuid import UUID, uuid4
+from unittest.mock import AsyncMock, MagicMock, patch
+from uuid import UUID
 
 from mailflow_core.classification.rule_engine import AccountConfig
 from mailflow_core.providers.base import EmailData
-from mailflow_core.types import ClassificationResult
 
 ACCOUNT_ID = UUID("00000000-0000-0000-0000-000000000001")
 
@@ -80,8 +77,8 @@ async def test_run_aborts_when_claim_cycle_fails(MockCycleRepo, MockAccountRepo)
 async def test_run_imap_connect_failure(
     mock_build, mock_decrypt, MockProvider, MockCycleRepo, MockAccountRepo
 ):
-    from mailflow_core.exceptions import IMAPConnectionError
     from app.services.cycle import CycleService
+    from mailflow_core.exceptions import IMAPConnectionError
 
     MockAccountRepo.return_value.claim_cycle = AsyncMock(return_value=True)
     MockAccountRepo.return_value.get_full_config = AsyncMock(
@@ -179,7 +176,8 @@ async def test_run_draft_bytes_passed_to_save_draft(
 
     account = make_account()
     # account con domain rule para "external.com" → method=domain_client
-    from mailflow_core.classification.rule_engine import AccountConfig, DomainRule as CoreDomainRule
+    from mailflow_core.classification.rule_engine import AccountConfig
+    from mailflow_core.classification.rule_engine import DomainRule as CoreDomainRule
     config = AccountConfig(
         account_id=str(ACCOUNT_ID),
         client_domain_rules=[CoreDomainRule(domain="external.com", label="Clients/Ext", rule_id="r1")],

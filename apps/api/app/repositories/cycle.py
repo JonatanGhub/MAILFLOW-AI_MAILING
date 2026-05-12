@@ -1,7 +1,7 @@
 """CycleRepository — audit_log y processed_emails."""
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy import select, update
@@ -42,7 +42,7 @@ class CycleRepository:
                 error_count=errors,
                 error_detail=error_detail,
                 duration_ms=duration_ms,
-                finalized_at=datetime.now(tz=timezone.utc),
+                finalized_at=datetime.now(tz=UTC),
             )
         )
 

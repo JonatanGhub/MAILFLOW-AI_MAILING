@@ -4,7 +4,6 @@ from __future__ import annotations
 import email as email_module
 from unittest.mock import MagicMock, patch
 
-
 # ── _build_draft_bytes ───────────────────────────────────────────────────────
 
 def test_build_draft_bytes_returns_valid_rfc2822():
@@ -109,9 +108,9 @@ def test_build_llm_client_classify_uses_classification_model():
 
 
 def test_build_llm_client_decrypts_api_key():
+    from app.crypto import encrypt
     from app.services.cycle import _build_llm_client
     from cryptography.fernet import Fernet
-    from app.crypto import encrypt
 
     key = Fernet.generate_key().decode()
     provider = MagicMock()
