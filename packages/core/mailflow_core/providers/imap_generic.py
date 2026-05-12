@@ -137,6 +137,7 @@ class ImapGenericProvider(EmailProvider):
         return result
 
     def move_email(self, uid: int, destination_folder: str) -> bool:
+        self.ensure_folder_exists(destination_folder)
         self._client.select_folder("INBOX")
         try:
             self._client.copy([uid], destination_folder)

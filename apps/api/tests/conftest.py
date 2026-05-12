@@ -7,9 +7,8 @@ Arrancar con:
 from __future__ import annotations
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-
 from app.models import Base
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 TEST_DATABASE_URL = "postgresql+asyncpg://mailflow:mailflow@localhost:5432/mailflow_test"
 

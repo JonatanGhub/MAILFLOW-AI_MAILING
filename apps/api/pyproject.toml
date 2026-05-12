@@ -34,9 +34,17 @@ dev = [
     "ruff>=0.8",
 ]
 
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["PLC0415"]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
 pythonpath = [".", "../worker"]
+markers = [
+    "integration: tests that require Docker (postgres + greenmail)",
+]
 
 [dependency-groups]
 dev = [
