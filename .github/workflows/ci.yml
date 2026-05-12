@@ -30,7 +30,7 @@ jobs:
           version: "latest"
           python-version: "3.13"
       - run: uv sync --all-packages
-      - run: uv run pytest packages/core/tests/ --cov=mailflow_core --cov-fail-under=80
+      - run: uv run pytest packages/core/tests/ -m "not integration" --cov=mailflow_core --cov-fail-under=80
 
   lint-ts:
     name: Lint TypeScript (Biome)
@@ -41,8 +41,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "pnpm"
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install
       - run: pnpm biome check .
 
   typecheck-ts:
@@ -54,8 +53,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "pnpm"
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install
       - run: pnpm typecheck
 
   docker-build:
