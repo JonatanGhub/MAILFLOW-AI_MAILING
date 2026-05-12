@@ -1,4 +1,5 @@
 """Modelo ProcessedEmail — registro idempotente de cada email procesado."""
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -41,7 +42,9 @@ class ProcessedEmail(Base):
     method: Mapped[str] = mapped_column(String(50))
     confidence: Mapped[float] = mapped_column(Float)
     draft_saved: Mapped[bool] = mapped_column(Boolean, default=False)
-    cycle_id: Mapped[UUID] = mapped_column(ForeignKey("audit_log.cycle_id", ondelete="CASCADE"))
+    cycle_id: Mapped[UUID] = mapped_column(
+        ForeignKey("audit_log.cycle_id", ondelete="CASCADE")
+    )
     processed_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

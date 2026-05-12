@@ -1,4 +1,5 @@
 """Cifrado simétrico con Fernet para credenciales almacenadas en DB."""
+
 from __future__ import annotations
 
 import json

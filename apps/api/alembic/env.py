@@ -1,4 +1,5 @@
 """Alembic env.py — configurado para SQLAlchemy async + autodescubrimiento de modelos."""
+
 from __future__ import annotations
 
 import asyncio

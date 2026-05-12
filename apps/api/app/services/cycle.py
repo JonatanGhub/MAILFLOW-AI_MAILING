@@ -7,6 +7,7 @@ Este módulo contiene:
   - _build_llm_client: construye LLMClient desde LLMProvider ORM model
   - _build_draft_bytes: convierte body text a email RFC2822 completo
 """
+
 from __future__ import annotations
 
 import logging
@@ -63,18 +64,22 @@ def _build_llm_client(
 
     api_key: str | None = None
     if llm_provider.encrypted_api_key:
-        api_key = decrypt(llm_provider.encrypted_api_key, settings.SECRET_KEY)["api_key"]
+        api_key = decrypt(llm_provider.encrypted_api_key, settings.SECRET_KEY)[
+            "api_key"
+        ]
 
     model_id = (
         llm_provider.default_generation_model
         if for_generation
         else llm_provider.default_classification_model
     )
-    return LLMClient(LLMConfig(
-        model_id=model_id,
-        api_base=llm_provider.base_url,
-        api_key=api_key,
-    ))
+    return LLMClient(
+        LLMConfig(
+            model_id=model_id,
+            api_base=llm_provider.base_url,
+            api_key=api_key,
+        )
+    )
 
 
 def _build_draft_bytes(
@@ -116,7 +121,9 @@ class CycleService:
             won = await AccountRepository(session).claim_cycle(account_id, now)
         if not won:
             log.info("Cycle for account %s already claimed, skipping", account_id)
-            return CycleResult(cycle_id=cycle_id, emails_processed=0, drafts_saved=0, errors=0)
+            return CycleResult(
+                cycle_id=cycle_id, emails_processed=0, drafts_saved=0, errors=0
+            )
 
         # ── 1. Crear audit_log ──────────────────────────────────────────────
         async with self._sf() as session:
@@ -125,13 +132,15 @@ class CycleService:
 
         # ── 2. Cargar config (sesión breve, sin IMAP) ───────────────────────
         async with self._sf() as session:
-            account, account_config, llm_provider = (
-                await AccountRepository(session).get_full_config(account_id)
-            )
+            account, account_config, llm_provider = await AccountRepository(
+                session
+            ).get_full_config(account_id)
             await session.commit()
 
         # ── 3. Construir herramientas de dominio ────────────────────────────
-        password = decrypt(account.encrypted_credentials, settings.SECRET_KEY)["password"]
+        password = decrypt(account.encrypted_credentials, settings.SECRET_KEY)[
+            "password"
+        ]
         provider = ImapGenericProvider(
             host=account.imap_host,
             port=account.imap_port,
@@ -159,9 +168,15 @@ class CycleService:
             for email_data in emails:
                 try:
                     await _process_one(
-                        email_data, account, cycle_id,
-                        provider, parser, rule_engine, generate_client,
-                        stats, self._sf,
+                        email_data,
+                        account,
+                        cycle_id,
+                        provider,
+                        parser,
+                        rule_engine,
+                        generate_client,
+                        stats,
+                        self._sf,
                     )
                 except Exception as exc:
                     stats["errors"] += 1
@@ -212,11 +227,15 @@ async def _process_one(
 
     # c. Clasificar
     if thread_folder:
-        result = ClassificationResult(label=thread_folder, confidence=0.95, method="thread")
+        result = ClassificationResult(
+            label=thread_folder, confidence=0.95, method="thread"
+        )
     else:
         result = rule_engine.classify(parsed)
 
-    destination = result.label if result.label != "unclassified" else account.unclassified_folder
+    destination = (
+        result.label if result.label != "unclassified" else account.unclassified_folder
+    )
 
     # d. INVARIANTE: mark ANTES de move. Tras move, el UID no existe en INBOX.
     provider.mark_as_processed(email_data.uid)
@@ -224,7 +243,11 @@ async def _process_one(
 
     # e. Generar borrador (solo emails no-internos y clasificados)
     draft_saved = False
-    if result.method != "domain_internal" and result.label != "unclassified" and generate_client:
+    if (
+        result.method != "domain_internal"
+        and result.label != "unclassified"
+        and generate_client
+    ):
         draft_request = DraftRequest(
             in_reply_to_uid=str(email_data.uid),
             # _drafts_folder es privado — tech debt Phase 2a (ver spec §15)

@@ -1,4 +1,5 @@
 """Modelo Organization — tenant raíz del sistema."""
+
 from __future__ import annotations
 
 from datetime import datetime

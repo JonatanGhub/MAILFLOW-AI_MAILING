@@ -1,4 +1,5 @@
 """Modelo LLMProvider — configuración de proveedor LLM por organización."""
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -14,9 +15,13 @@ class LLMProvider(Base):
     __tablename__ = "llm_providers"
 
     id: Mapped[UUID] = uuid_pk()
-    org_id: Mapped[UUID] = mapped_column(ForeignKey("organizations.id", ondelete="CASCADE"))
+    org_id: Mapped[UUID] = mapped_column(
+        ForeignKey("organizations.id", ondelete="CASCADE")
+    )
     label: Mapped[str] = mapped_column(String(100))
-    type: Mapped[str] = mapped_column(String(50))  # 'ollama'|'openai'|'anthropic'|'custom'
+    type: Mapped[str] = mapped_column(
+        String(50)
+    )  # 'ollama'|'openai'|'anthropic'|'custom'
     base_url: Mapped[str] = mapped_column(String(500))
     encrypted_api_key: Mapped[str | None] = mapped_column(String, nullable=True)
     default_classification_model: Mapped[str] = mapped_column(String(200))

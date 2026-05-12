@@ -1,4 +1,5 @@
 """Modelo AuditLog — registro de cada ciclo de procesamiento."""
+
 from __future__ import annotations
 
 from datetime import datetime

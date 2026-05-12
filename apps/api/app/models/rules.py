@@ -7,6 +7,7 @@ IMPORTANTE — colisión de nombres:
     from app.models.rules import DomainRule as DbDomainRule
     from mailflow_core.classification.rule_engine import DomainRule as CoreDomainRule
 """
+
 from __future__ import annotations
 
 from uuid import UUID

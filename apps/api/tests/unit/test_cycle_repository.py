@@ -1,4 +1,5 @@
 """Tests de CycleRepository con Postgres real."""
+
 from __future__ import annotations
 
 from uuid import uuid4
@@ -55,12 +56,17 @@ async def test_finalize_audit_log(session, account):
     await session.commit()
 
     await repo.finalize_audit_log(
-        cycle_id, emails=3, drafts=1, errors=0,
-        error_detail=None, duration_ms=1500,
+        cycle_id,
+        emails=3,
+        drafts=1,
+        errors=0,
+        error_detail=None,
+        duration_ms=1500,
     )
     await session.commit()
 
     from sqlalchemy import select
+
     log = (
         await session.execute(select(AuditLog).where(AuditLog.cycle_id == cycle_id))
     ).scalar_one()
@@ -77,10 +83,18 @@ async def test_insert_processed_idempotent(session, account):
 
     repo = CycleRepository(session)
     kwargs = dict(
-        account_id=account.id, uid=42, folder="INBOX", uidvalidity=1000,
-        message_id="<msg@test>", from_email="a@b.com", subject="Hi",
-        destination_folder="Clients/B", method="domain_client", confidence=0.95,
-        draft_saved=False, cycle_id=cycle_id,
+        account_id=account.id,
+        uid=42,
+        folder="INBOX",
+        uidvalidity=1000,
+        message_id="<msg@test>",
+        from_email="a@b.com",
+        subject="Hi",
+        destination_folder="Clients/B",
+        method="domain_client",
+        confidence=0.95,
+        draft_saved=False,
+        cycle_id=cycle_id,
     )
     await repo.insert_processed(**kwargs)
     await session.commit()
@@ -90,6 +104,7 @@ async def test_insert_processed_idempotent(session, account):
 
     from app.models.processed_email import ProcessedEmail
     from sqlalchemy import func, select
+
     count = (
         await session.execute(
             select(func.count()).where(ProcessedEmail.account_id == account.id)
@@ -105,10 +120,18 @@ async def test_find_thread_folder_returns_folder(session, account):
 
     repo = CycleRepository(session)
     await repo.insert_processed(
-        account_id=account.id, uid=10, folder="INBOX", uidvalidity=999,
-        message_id="<original@test>", from_email="x@y.com", subject="Orig",
-        destination_folder="Clients/X", method="domain_client", confidence=0.95,
-        draft_saved=False, cycle_id=cycle_id,
+        account_id=account.id,
+        uid=10,
+        folder="INBOX",
+        uidvalidity=999,
+        message_id="<original@test>",
+        from_email="x@y.com",
+        subject="Orig",
+        destination_folder="Clients/X",
+        method="domain_client",
+        confidence=0.95,
+        draft_saved=False,
+        cycle_id=cycle_id,
     )
     await session.commit()
 

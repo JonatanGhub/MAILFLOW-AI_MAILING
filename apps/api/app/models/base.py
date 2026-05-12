@@ -1,4 +1,5 @@
 """Base declarativa + helper uuid_pk para todos los modelos SQLAlchemy."""
+
 from __future__ import annotations
 
 import uuid

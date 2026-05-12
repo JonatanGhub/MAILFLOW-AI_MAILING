@@ -1,4 +1,5 @@
 """Tests unitarios de CycleService — todo mockeado (sin DB ni IMAP real)."""
+
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
@@ -53,12 +54,14 @@ def make_account():
 
 # ── claim_cycle → False: abort ───────────────────────────────────────────────
 
+
 @patch("app.services.cycle.AccountRepository")
 @patch("app.services.cycle.CycleRepository")
 async def test_run_aborts_when_claim_cycle_fails(MockCycleRepo, MockAccountRepo):
     MockAccountRepo.return_value.claim_cycle = AsyncMock(return_value=False)
 
     from app.services.cycle import CycleService
+
     result = await CycleService(make_sf()).run(ACCOUNT_ID)
 
     assert result.emails_processed == 0
@@ -68,6 +71,7 @@ async def test_run_aborts_when_claim_cycle_fails(MockCycleRepo, MockAccountRepo)
 
 
 # ── IMAP connect falla ───────────────────────────────────────────────────────
+
 
 @patch("app.services.cycle.AccountRepository")
 @patch("app.services.cycle.CycleRepository")
@@ -97,6 +101,7 @@ async def test_run_imap_connect_failure(
 
 # ── mark_as_processed ANTES de move_email ───────────────────────────────────
 
+
 @patch("app.services.cycle.AccountRepository")
 @patch("app.services.cycle.CycleRepository")
 @patch("app.services.cycle.ImapGenericProvider")
@@ -113,13 +118,19 @@ async def test_run_mark_before_move(
     )
     MockCycleRepo.return_value.create_audit_log = AsyncMock()
     MockCycleRepo.return_value.finalize_audit_log = AsyncMock()
-    MockProvider.return_value.fetch_unprocessed_emails.return_value = [make_email(uid=42)]
+    MockProvider.return_value.fetch_unprocessed_emails.return_value = [
+        make_email(uid=42)
+    ]
     MockCycleRepo.return_value.find_thread_folder = AsyncMock(return_value=None)
     MockCycleRepo.return_value.insert_processed = AsyncMock()
 
     call_order: list[str] = []
-    MockProvider.return_value.mark_as_processed.side_effect = lambda uid: call_order.append(f"mark:{uid}")
-    MockProvider.return_value.move_email.side_effect = lambda uid, dest: call_order.append(f"move:{uid}")
+    MockProvider.return_value.mark_as_processed.side_effect = lambda uid: (
+        call_order.append(f"mark:{uid}")
+    )
+    MockProvider.return_value.move_email.side_effect = lambda uid, dest: (
+        call_order.append(f"move:{uid}")
+    )
 
     result = await CycleService(make_sf()).run(ACCOUNT_ID)
 
@@ -128,6 +139,7 @@ async def test_run_mark_before_move(
 
 
 # ── Thread inheritance → method="thread" ────────────────────────────────────
+
 
 @patch("app.services.cycle.AccountRepository")
 @patch("app.services.cycle.CycleRepository")
@@ -164,6 +176,7 @@ async def test_run_thread_inheritance(
 
 # ── Draft generation → save_draft recibe bytes ──────────────────────────────
 
+
 @patch("app.services.cycle.AccountRepository")
 @patch("app.services.cycle.CycleRepository")
 @patch("app.services.cycle.ImapGenericProvider")
@@ -178,9 +191,12 @@ async def test_run_draft_bytes_passed_to_save_draft(
     # account con domain rule para "external.com" → method=domain_client
     from mailflow_core.classification.rule_engine import AccountConfig
     from mailflow_core.classification.rule_engine import DomainRule as CoreDomainRule
+
     config = AccountConfig(
         account_id=str(ACCOUNT_ID),
-        client_domain_rules=[CoreDomainRule(domain="external.com", label="Clients/Ext", rule_id="r1")],
+        client_domain_rules=[
+            CoreDomainRule(domain="external.com", label="Clients/Ext", rule_id="r1")
+        ],
     )
 
     MockAccountRepo.return_value.claim_cycle = AsyncMock(return_value=True)
@@ -189,16 +205,25 @@ async def test_run_draft_bytes_passed_to_save_draft(
     )
     MockCycleRepo.return_value.create_audit_log = AsyncMock()
     MockCycleRepo.return_value.finalize_audit_log = AsyncMock()
-    MockProvider.return_value.fetch_unprocessed_emails.return_value = [make_email(uid=55)]
+    MockProvider.return_value.fetch_unprocessed_emails.return_value = [
+        make_email(uid=55)
+    ]
     MockCycleRepo.return_value.find_thread_folder = AsyncMock(return_value=None)
     MockCycleRepo.return_value.insert_processed = AsyncMock()
 
     mock_generate_client = MagicMock()
-    mock_generate_client.generate_draft.return_value = "Estimado cliente, gracias por su consulta."
-    mock_build.side_effect = [None, mock_generate_client]  # classify=None, generate=mock
+    mock_generate_client.generate_draft.return_value = (
+        "Estimado cliente, gracias por su consulta."
+    )
+    mock_build.side_effect = [
+        None,
+        mock_generate_client,
+    ]  # classify=None, generate=mock
 
     saved_bytes: list = []
-    MockProvider.return_value.save_draft.side_effect = lambda b: saved_bytes.append(b) or True
+    MockProvider.return_value.save_draft.side_effect = lambda b: (
+        saved_bytes.append(b) or True
+    )
 
     await CycleService(make_sf()).run(ACCOUNT_ID)
 
@@ -206,5 +231,6 @@ async def test_run_draft_bytes_passed_to_save_draft(
     assert isinstance(saved_bytes[0], bytes)
     # Verificar que los bytes son un email RFC2822 válido
     import email as email_module
+
     msg = email_module.message_from_bytes(saved_bytes[0])
     assert "Re:" in msg["Subject"]

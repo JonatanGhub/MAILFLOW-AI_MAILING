@@ -1,4 +1,5 @@
 """CycleRepository — audit_log y processed_emails."""
+
 from __future__ import annotations
 
 from datetime import UTC, datetime
@@ -81,15 +82,11 @@ class CycleRepository:
                 draft_saved=draft_saved,
                 cycle_id=cycle_id,
             )
-            .on_conflict_do_nothing(
-                index_elements=["account_id", "uid", "uidvalidity"]
-            )
+            .on_conflict_do_nothing(index_elements=["account_id", "uid", "uidvalidity"])
         )
         await self._session.execute(stmt)
 
-    async def find_thread_folder(
-        self, account_id: UUID, message_id: str
-    ) -> str | None:
+    async def find_thread_folder(self, account_id: UUID, message_id: str) -> str | None:
         """Busca si message_id fue clasificado antes. Usa INDEX (account_id, message_id)."""
         stmt = (
             select(ProcessedEmail.destination_folder)

@@ -1,4 +1,5 @@
 """AccountRepository — consultas de cuentas de email y config completa."""
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -110,7 +111,9 @@ class AccountRepository:
         db_int = list(
             (
                 await self._session.execute(
-                    select(InternalDomain).where(InternalDomain.account_id == account_id)
+                    select(InternalDomain).where(
+                        InternalDomain.account_id == account_id
+                    )
                 )
             ).scalars()
         )

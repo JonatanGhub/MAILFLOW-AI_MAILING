@@ -1,17 +1,17 @@
 """ARQ worker entry point — reemplaza el stub de Fase 1."""
+
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
-
-from arq import cron
-from arq.connections import RedisSettings
 
 from app.config import settings
 from app.database import async_session_factory
 from app.repositories.account import AccountRepository
 from app.services.cycle import CycleService
+from arq import cron
+from arq.connections import RedisSettings
 
 log = logging.getLogger("mailflow.worker")
 
@@ -40,7 +40,7 @@ async def schedule_cycles(ctx: dict) -> None:
     ARQ deduplicación: _job_id=f"cycle-{account.id}" evita encolar
     la misma cuenta dos veces si el cron se solapa.
     """
-    now = datetime.now(tz=timezone.utc)
+    now = datetime.now(tz=UTC)
     async with ctx["session_factory"]() as session:
         accounts = await AccountRepository(session).get_accounts_due(now)
 
@@ -56,9 +56,7 @@ async def schedule_cycles(ctx: dict) -> None:
 
 class WorkerSettings:
     functions = [process_account_cycle]
-    cron_jobs = [
-        cron(schedule_cycles, minute={0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55})
-    ]
+    cron_jobs = [cron(schedule_cycles, minute={0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55})]
     on_startup = on_startup
     queue_name = "mailflow:default"
     redis_settings = RedisSettings.from_dsn(settings.REDIS_URL)

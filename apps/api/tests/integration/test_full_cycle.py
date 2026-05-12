@@ -7,6 +7,7 @@ por lo que no se generan borradores. Se verifica:
   - audit_log: finalized_at NOT NULL
   - Greenmail: email movido a la carpeta destino
 """
+
 from __future__ import annotations
 
 import imaplib
@@ -98,7 +99,9 @@ def _get_imap_folder_uids(folder: str) -> list[str]:
 
 
 @pytest.mark.integration
-async def test_full_cycle_classifies_and_moves_email(session, session_factory, full_account):
+async def test_full_cycle_classifies_and_moves_email(
+    session, session_factory, full_account
+):
     """Ciclo completo: email → classify → move → audit_log finalizado."""
     # 1. Enviar email desde external.com
     _send_test_email("Invoice inquiry")
@@ -128,7 +131,9 @@ async def test_full_cycle_classifies_and_moves_email(session, session_factory, f
     records = list(
         (
             await session.execute(
-                select(ProcessedEmail).where(ProcessedEmail.account_id == full_account.id)
+                select(ProcessedEmail).where(
+                    ProcessedEmail.account_id == full_account.id
+                )
             )
         ).scalars()
     )

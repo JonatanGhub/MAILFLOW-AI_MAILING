@@ -2,6 +2,7 @@
 
 Requiere: docker compose up -d postgres
 """
+
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
@@ -22,6 +23,7 @@ TEST_SECRET_KEY = "qdCa5nGhLjd8qY0CCaQP2dE000lbSYDmtPnhzAVeVgs="
 
 # ── Fixtures ────────────────────────────────────────────────────────────────
 
+
 @pytest.fixture()
 async def org(session):
     o = Organization(name="Test Org", slug=f"test-{uuid4().hex[:8]}")
@@ -33,6 +35,7 @@ async def org(session):
 @pytest.fixture()
 async def account(session, org):
     from app.crypto import encrypt
+
     acc = EmailAccount(
         org_id=org.id,
         imap_host="localhost",
@@ -48,6 +51,7 @@ async def account(session, org):
 
 
 # ── Tests get_accounts_due ───────────────────────────────────────────────────
+
 
 async def test_get_accounts_due_includes_never_run(session, account):
     repo = AccountRepository(session)
@@ -88,6 +92,7 @@ async def test_get_accounts_due_excludes_inactive(session, account):
 
 # ── Tests claim_cycle ────────────────────────────────────────────────────────
 
+
 async def test_claim_cycle_returns_true_first_call(session, account):
     repo = AccountRepository(session)
     now = datetime.now(tz=UTC)
@@ -110,16 +115,28 @@ async def test_claim_cycle_returns_false_second_call(session_factory, account):
 
 # ── Tests get_full_config ────────────────────────────────────────────────────
 
+
 async def test_get_full_config_builds_account_config(session, account):
     # Insertar reglas
-    session.add(DbDomainRule(
-        account_id=account.id,
-        domain="client.com", label="Clients/Client", rule_id="r1", priority=0,
-    ))
-    session.add(DbKeywordRule(
-        account_id=account.id,
-        keywords=["urgent", "ASAP"], label="Urgent", rule_id="r2", match_all=False, priority=1,
-    ))
+    session.add(
+        DbDomainRule(
+            account_id=account.id,
+            domain="client.com",
+            label="Clients/Client",
+            rule_id="r1",
+            priority=0,
+        )
+    )
+    session.add(
+        DbKeywordRule(
+            account_id=account.id,
+            keywords=["urgent", "ASAP"],
+            label="Urgent",
+            rule_id="r2",
+            match_all=False,
+            priority=1,
+        )
+    )
     session.add(InternalDomain(account_id=account.id, domain="company.com"))
     await session.commit()
 
