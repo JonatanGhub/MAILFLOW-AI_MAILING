@@ -7,4 +7,5 @@ dependencies = [
     "arq>=0.26",
     "redis>=5.2",
     "mailflow-core",
+    "mailflow-api",
 ]
